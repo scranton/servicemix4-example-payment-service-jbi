@@ -17,7 +17,7 @@ Using Apache Maven 2.2.1 or 3.x in this projects root directory
 Running
 -------
 
-Tested with ServiceMix 4.2.0-fuse-02-00, 4.3.1-fuse-01-22, and 4.4.0-fuse-00-43 ([download|http://fusesource.com/downloads/])
+Tested with ServiceMix 4.2.0-fuse-02-00, 4.3.1-fuse-01-22, and 4.4.0-fuse-00-43 ([download](http://fusesource.com/downloads/))
 
 Start ServiceMix (`bin/servicemix`), and from the ServiceMix console execute the following
 
