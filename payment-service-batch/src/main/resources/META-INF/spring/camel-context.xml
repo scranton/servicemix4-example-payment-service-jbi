@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright 2011 FuseSource
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:example="http://fuse.example.com"
+       xmlns:typ="http://fuse.example.com/payment-service/types"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://camel.apache.org/schema/spring
+			http://camel.apache.org/schema/spring/camel-spring.xsd
+	">
+
+    <camelContext xmlns="http://camel.apache.org/schema/spring" trace="true">
+
+        <!-- Main Batch Splitting Route -->
+        <route>
+            <from uri="file:tmp/file-in?delete=true"/>
+            <convertBodyTo type="org.w3c.dom.Document"/>
+            <to uri="log:batchSplitLog"/>
+            <split>
+                <xpath>/typ:transfers/typ:transfer</xpath>
+                <to uri="jbi:endpoint:http://fuse.example.com/paymentService/endpoint?mep=in-out"/>
+            </split>
+        </route>
+
+        <!-- Route used for testing -->
+        <route>
+            <from uri="timer://myTimer?fixedRate=true&amp;period=5000"/>
+            <setBody>
+                <constant>
+                    <![CDATA[
+<transfers xmlns="http://fuse.example.com/payment-service/types">
+	<transfer>
+		<from>john doe</from>
+		<to>jack rabbit</to>
+		<amount>1000000</amount>
+	</transfer>
+	<transfer>
+		<from>jack rabbit</from>
+		<to>john doe</to>
+		<amount>1</amount>
+	</transfer>
+</transfers>
+]]>
+                </constant>
+            </setBody>
+            <to uri="log:batchSplitterTestLog"/>
+            <setHeader headerName="org.apache.camel.file.name">
+                <constant>transfer.xml</constant>
+            </setHeader>
+            <to uri="file:tmp/file-in"/>
+        </route>
+
+    </camelContext>
+
+</beans>
